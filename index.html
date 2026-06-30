@@ -87,7 +87,10 @@
     <script>
         // تهيئة تطبيق تيليغرام المصغر
         const tg = window.Telegram.WebApp;
-        tg.expand(); // تمديد الشاشة لتغطية الهاتف بالكامل مثل هامستر
+        tg.expand();
+
+        // رابط السيرفر الخاص بك (تغييره لاحقاً عند رفع البوت على سيرفر خارجي)
+        const API_BASE_URL = "http://localhost:8000"; 
 
         // جلب بيانات العميل الحقيقية من تيليغرام
         const user = tg.initDataUnsafe?.user;
@@ -96,6 +99,24 @@
             document.getElementById('user-id').innerText = "ID: " + user.id;
             if(user.first_name) {
                 document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
+            }
+
+            // استدعاء دالة جلب الأرصدة الحقيقية من قاعدة البيانات
+            fetchUserData(user.id);
+        }
+
+        // دالة الاتصال بالـ API وتحديث الرصيد والتيكت في الواجهة
+        async function fetchUserData(telegramId) {
+            try {
+                const response = await fetch(${API_BASE_URL}/api/user/${telegramId});
+                if (response.ok) {
+                    const data = await response.json();
+                    // تحديث الأرقام في الموقع برمجياً بناءً على قاعدة البيانات
+                    document.getElementById('user-balance').innerText = data.balance.toFixed(2) + "$";
+                    document.getElementById('tickets-count').innerText = data.tickets_count;
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
             }
         }
 
