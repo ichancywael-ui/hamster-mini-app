@@ -140,20 +140,44 @@
             }
         }
 
-        // دالة فتح التيكت المحدثة
         function openTicket() {
-            tg.showPopup({
-                title: '🎟️ فتح تيكت الحظ',
-                message: 'هل تريد استخدام تيكت واحد لطلب مكافأة عشوائية؟',
-                buttons: [{id: 'ok', type: 'default', text: 'نعم، افتح'}, {type: 'cancel', text: 'إلغاء'}]
-            }, function(buttonId) {
-                if(buttonId === 'ok') {
-                    // إرسال أمر للبوت بالخلفية وإغلاق الـ Mini App تلقائياً
-                    tg.sendData(JSON.stringify({action: "open_ticket"}));
-                    tg.close();
+    tg.showPopup({
+        title: '🎟️ فتح تيكت الحظ',
+        message: 'هل تريد استخدام تيكت واحد لطلب مكافأة عشوائية؟',
+        buttons: [{id: 'ok', type: 'default', text: 'نعم، افتح'}, {type: 'cancel', text: 'إلغاء'}]
+    }, async function(buttonId) { // أضفنا هنا async
+        if(buttonId === 'ok') {
+            
+            // 1. جلب معرف المستخدم من تيليغرام
+            const telegramId = tg.initDataUnsafe?.user?.id;
+            if (!telegramId) return;
+
+            try {
+                // 2. إرسال طلب حقيقي لسيرفر الـ FastAPI لفتح التيكت (سنقوم بإنشاء هذه النقطة في البايثون)
+                const response = await fetch(${API_BASE_URL}/api/open-ticket/${telegramId}, { method: 'POST' });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // 3. إظهار النتيجة للمستخدم داخل الـ Mini App نفسه دون إغلاقه
+                    tg.showPopup({
+                        title: '🎉 مبروووك!',
+                        message: ربحت بمكافأة عشوائية بقيمة: +${result.reward}$\nرصيدك الحالي أصبح: ${result.new_balance}$
+                    });
+
+                    // 4. تحديث الأرقام على الشاشة فوراً
+                    document.getElementById('user-balance').innerText = result.new_balance.toFixed(2) + "$";
+                    document.getElementById('tickets-count').innerText = result.tickets_count;
+                } else {
+                    const errorData = await response.json();
+                    tg.showAlert(errorData.detail || "عذراً، لا تمتلك تيكت كافٍ!");
                 }
-            });
+            } catch (error) {
+                tg.showAlert("❌ فشل الاتصال بالسيرفر، تأكد أن البوت يعمل على جهازك.");
+            }
         }
+    });
+}
         
         // دالة طلب الاستثمار المحدثة
         function invest(packageType) {
