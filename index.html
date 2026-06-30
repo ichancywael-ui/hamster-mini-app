@@ -89,8 +89,8 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // رابط السيرفر الخاص بك (تغييره لاحقاً عند رفع البوت على سيرفر خارجي)
-        const API_BASE_URL = "http://localhost:8000"; 
+        // ⚠️ ضع رابط الـ .up.railway.app الخاص بك الذي نسخته من Railway هنا:
+        const API_BASE_URL = "https://your-project-name.up.railway.app"; 
 
         // جلب بيانات العميل الحقيقية من تيليغرام
         const user = tg.initDataUnsafe?.user;
@@ -101,17 +101,16 @@
                 document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
             }
 
-            // استدعاء دالة جلب الأرصدة الحقيقية من قاعدة البيانات
+            // استدعاء دالة جلب الأرصدة والتيكت من سيرفر Railway عند فتح التطبيق
             fetchUserData(user.id);
         }
 
-        // دالة الاتصال بالـ API وتحديث الرصيد والتيكت في الواجهة
+        // دالة جلب البيانات الحية من Railway
         async function fetchUserData(telegramId) {
             try {
-                const response = await fetch('${API_BASE_URL}/api/user/${telegramId}');
+                const response = await fetch(API_BASE_URL + "/api/user/" + telegramId);
                 if (response.ok) {
                     const data = await response.json();
-                    // تحديث الأرقام في الموقع برمجياً بناءً على قاعدة البيانات
                     document.getElementById('user-balance').innerText = data.balance.toFixed(2) + "$";
                     document.getElementById('tickets-count').innerText = data.tickets_count;
                 }
@@ -120,13 +119,65 @@
             }
         }
 
+        // دالة فتح التيكت الاحترافية (تحديث مباشر على الشاشة دون إغلاق التطبيق)
+        function openTicket() {
+            tg.showPopup({
+                title: '🎟️ فتح تيكت الحظ',
+                message: 'هل تريد استخدام تيكت واحد لطلب مكافأة عشوائية؟',
+                buttons: [{id: 'ok', type: 'default', text: 'نعم، افتح'}, {type: 'cancel', text: 'إلغاء'}]
+            }, async function(buttonId) {
+                if(buttonId === 'ok') {
+                    const telegramId = tg.initDataUnsafe?.user?.id;
+                    if (!telegramId) return;
+
+                    try {
+                        // إرسال طلب POST إلى سيرفر Railway
+                        const response = await fetch(API_BASE_URL + "/api/open-ticket/" + telegramId, { method: 'POST' });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            
+                            // إظهار بوب أب بالنتيجة داخل الـ Mini App نفسه
+                            tg.showPopup({
+                                title: '🎉 مبروووك!',
+                                message: 'ربحت بمكافأة عشوائية بقيمة: +' + result.reward + '$\nرصيدك الحالي أصبح: ' + result.new_balance + '$'
+                            });
+
+                            // تحديث الرصيد والتيكت المتبقي فوراً على الشاشة
+                            document.getElementById('user-balance').innerText = result.new_balance.toFixed(2) + "$";
+                            document.getElementById('tickets-count').innerText = result.tickets_count;
+                        } else {
+                            const errorData = await response.json();
+                            tg.showAlert(errorData.detail || "عذراً، لا تمتلك تيكت كافٍ!");
+                        }
+                    } catch (error) {
+                        tg.showAlert("❌ فشل الاتصال بالسيرفر على Railway.");
+                    }
+                }
+            });
+        }
+        
+        // دالة طلب الاستثمار المحدثة
+        function invest(packageType) {
+            tg.showPopup({
+                title: '💼 تأكيد الاستثمار',
+                message: 'هل أنت متأكد من رغبتك في تفعيل الباقة (' + packageType + ')؟',
+                buttons: [{id: 'confirm', type: 'ok', text: 'تأكيد الشراء'}, {type: 'cancel', text: 'إلغاء'}]
+                    }, function(buttonId) {
+                if(buttonId === 'confirm') {
+                    // إرسال البيانات صامتة للبوت
+                    tg.sendData(JSON.stringify({action: "buy_package", package: packageType}));
+                    tg.close();
+                }
+            });
+        }
+
         // التنقل بين التبويبات
         function switchTab(tab) {
             const mainTab = document.getElementById('tab-main');
             const investTab = document.getElementById('tab-invest');
             const mainBtn = document.getElementById('tab-main-btn');
             const investBtn = document.getElementById('tab-invest-btn');
-
             if (tab === 'main') {
                 mainTab.classList.remove('hidden');
                 investTab.classList.add('hidden');
@@ -138,60 +189,6 @@
                 mainBtn.className = "flex-1 py-2 rounded-xl bg-slate-800 text-slate-400 font-medium text-center transition-all";
                 investBtn.className = "flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-center transition-all";
             }
-        }
-
-        function openTicket() {
-    tg.showPopup({
-        title: '🎟️ فتح تيكت الحظ',
-        message: 'هل تريد استخدام تيكت واحد لطلب مكافأة عشوائية؟',
-        buttons: [{id: 'ok', type: 'default', text: 'نعم، افتح'}, {type: 'cancel', text: 'إلغاء'}]
-    }, async function(buttonId) { // أضفنا هنا async
-        if(buttonId === 'ok') {
-            
-            // 1. جلب معرف المستخدم من تيليغرام
-            const telegramId = tg.initDataUnsafe?.user?.id;
-            if (!telegramId) return;
-
-            try {
-                // 2. إرسال طلب حقيقي لسيرفر الـ FastAPI لفتح التيكت (سنقوم بإنشاء هذه النقطة في البايثون)
-                const response = await fetch(${API_BASE_URL}/api/open-ticket/${telegramId}, { method: 'POST' });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    
-                    // 3. إظهار النتيجة للمستخدم داخل الـ Mini App نفسه دون إغلاقه
-                    tg.showPopup({
-                        title: '🎉 مبروووك!',
-                        message: ربحت بمكافأة عشوائية بقيمة: +${result.reward}$\nرصيدك الحالي أصبح: ${result.new_balance}$
-                    });
-
-                    // 4. تحديث الأرقام على الشاشة فوراً
-                    document.getElementById('user-balance').innerText = result.new_balance.toFixed(2) + "$";
-                    document.getElementById('tickets-count').innerText = result.tickets_count;
-                } else {
-                    const errorData = await response.json();
-                    tg.showAlert(errorData.detail || "عذراً، لا تمتلك تيكت كافٍ!");
-                }
-            } catch (error) {
-                tg.showAlert("❌ فشل الاتصال بالسيرفر، تأكد أن البوت يعمل على جهازك.");
-            }
-        }
-    });
-}
-        
-        // دالة طلب الاستثمار المحدثة
-        function invest(packageType) {
-            tg.showPopup({
-                title: '💼 تأكيد الاستثمار',
-                message: 'هل أنت متأكد من رغبتك في تفعيل الباقة (' + packageType + ')؟',
-                buttons: [{id: 'confirm', type: 'ok', text: 'تأكيد الشراء'}, {type: 'cancel', text: 'إلغاء'}]
-            }, function(buttonId) {
-                if(buttonId === 'confirm') {
-                    // إرسال نوع الباقة للبوت
-                    tg.sendData(JSON.stringify({action: "buy_package", package: packageType}));
-                    tg.close();
-                }
-            });
         }
     </script>
 </body>
