@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 
 # إعدادات الاتصال بقاعدة البيانات - استبدلها ببياناتك
 DB_CONFIG = {
-    'host': 'localhost',
+    'host': 'mysql.railway.internal',
     'port': 3306,
     'user': 'root',
-    'password': '',
+    'password': 'ACkdOMkKZEqOSNdsXTDvdhalEMoLNQfq',
     'db': 'telegram_investment_bot',
     'autocommit': True
 }
