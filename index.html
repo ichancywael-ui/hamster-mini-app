@@ -108,7 +108,7 @@
         // دالة الاتصال بالـ API وتحديث الرصيد والتيكت في الواجهة
         async function fetchUserData(telegramId) {
             try {
-                const response = await fetch(${API_BASE_URL}/api/user/${telegramId});
+                const response = await fetch('${API_BASE_URL}/api/user/${telegramId}');
                 if (response.ok) {
                     const data = await response.json();
                     // تحديث الأرقام في الموقع برمجياً بناءً على قاعدة البيانات
