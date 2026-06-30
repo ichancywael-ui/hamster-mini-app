@@ -119,26 +119,33 @@
             }
         }
 
-        // دالة الضغط على فتح التيكت
+        // دالة فتح التيكت المحدثة
         function openTicket() {
             tg.showPopup({
-                title: '🎟 فتح تيكت الحظ',
+                title: '🎟️ فتح تيكت الحظ',
                 message: 'هل تريد استخدام تيكت واحد لطلب مكافأة عشوائية؟',
                 buttons: [{id: 'ok', type: 'default', text: 'نعم، افتح'}, {type: 'cancel', text: 'إلغاء'}]
             }, function(buttonId) {
                 if(buttonId === 'ok') {
-                    tg.showAlert('🎉 جاري معالجة طلبك وسحب الجائزة...');
-                    // هنا سيتم لاحقاً إرسال طلب fetch إلى الـ FastAPI Backend لتحديث البيانات حركياً
+                    // إرسال أمر للبوت بالخلفية وإغلاق الـ Mini App تلقائياً
+                    tg.sendData(JSON.stringify({action: "open_ticket"}));
+                    tg.close();
                 }
             });
         }
-
-        // دالة طلب الاستثمار في باقة
+        
+        // دالة طلب الاستثمار المحدثة
         function invest(packageType) {
             tg.showPopup({
                 title: '💼 تأكيد الاستثمار',
-                message:'هل أنت متأكد من رغبتك في تفعيل الباقة (${packageType})؟ سيتطلب هذا وجود رصيد كافٍ في حسابك.',
+                message: 'هل أنت متأكد من رغبتك في تفعيل الباقة (${packageType})؟',
                 buttons: [{id: 'confirm', type: 'ok', text: 'تأكيد الشراء'}, {type: 'cancel', text: 'إلغاء'}]
+            }, function(buttonId) {
+                if(buttonId === 'confirm') {
+                    // إرسال نوع الباقة للبوت
+                    tg.sendData(JSON.stringify({action: "buy_package", package: packageType}));
+                    tg.close();
+                }
             });
         }
     </script>
