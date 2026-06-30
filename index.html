@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamster Investment App</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body class="bg-slate-900 text-white font-sans antialiased select-none">
+
+    <div class="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center shadow-lg">
+        <div class="flex items-center space-x-3 space-x-reverse">
+            <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 shadow" id="user-avatar">
+                U
+            </div>
+            <div>
+                <h1 class="text-sm font-bold" id="user-name">جاري التحميل...</h1>
+                <p class="text-xs text-slate-400" id="user-id">ID: 0000000</p>
+            </div>
+        </div>
+        <div class="text-left">
+            <p class="text-xs text-amber-400 font-medium">الرصيد المتاح</p>
+            <p class="text-xl font-black text-emerald-400" id="user-balance">0.00$</p>
+        </div>
+    </div>
+
+    <div class="m-4 p-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-xl flex justify-between items-center">
+        <div>
+            <h2 class="font-black text-lg text-slate-950">🎟 تيكت الحظ اليومي</h2>
+            <p class="text-xs text-amber-100 mt-1">افتح التيكت واربح من 0.50$ إلى 10$ فوراً!</p>
+            <p class="text-sm font-bold text-slate-950 mt-2">التيكت المتاحة: <span id="tickets-count" class="bg-white px-2 py-0.5 rounded-full text-xs">1</span></p>
+        </div>
+        <button onclick="openTicket()" class="bg-slate-950 hover:bg-slate-800 text-amber-400 font-bold px-4 py-3 rounded-xl shadow text-sm transition-all active:scale-95">
+            افتح الآن
+        </button>
+    </div>
+
+    <div class="px-4 flex space-x-2 space-x-reverse text-sm">
+        <button onclick="switchTab('main')" id="tab-main-btn" class="flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-center transition-all">الباقة الرئيسية</button>
+        <button onclick="switchTab('invest')" id="tab-invest-btn" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-400 font-medium text-center transition-all">قسم Investment</button>
+    </div>
+
+    <div id="tab-main" class="p-4 space-y-4">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md">
+            <div class="flex justify-between items-start">
+                <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-1 rounded-md font-bold">باقة VIP كبار المستثمرين</span>
+                <span class="text-2xl">🔥</span>
+            </div>
+            <h3 class="text-lg font-black mt-2">العائد اليومي الناري %10</h3>
+            <p class="text-xs text-slate-400 mt-1">تمنحك هذه الباقة عائداً ثابتاً يُضاف لحسابك كل 24 ساعة بدون توقف.</p>
+            <div class="mt-4 pt-4 border-t border-slate-700/50 flex justify-between text-sm">
+                <div><span class="text-slate-400 block text-xs">الحد الأدنى</span> <span class="font-bold text-amber-400">500$</span></div>
+                <div><span class="text-slate-400 block text-xs">الحد الأقصى</span> <span class="font-bold text-amber-400">500,000$</span></div>
+            </div>
+            <button onclick="invest('main')" class="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                استثمر الآن
+            </button>
+        </div>
+    </div>
+
+    <div id="tab-invest" class="p-4 space-y-4 hidden">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md">
+            <h3 class="text-md font-black text-amber-400">📊 باقة النمو السريع (يومية)</h3>
+            <p class="text-xs text-slate-400 mt-1">ربح يومي بنسبة <span class="text-emerald-400 font-bold">9%</span> كل 24 ساعة.</p>
+            <div class="mt-3 flex justify-between text-xs text-slate-400">
+                <span>الحد الأدنى: 25$</span>
+                <span>الحد الأقصى: 10,000$</span>
+            </div>
+            <button onclick="invest('plan_1')" class="w-full mt-3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded-xl text-sm transition-all">استثمار</button>
+        </div>
+
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md border-amber-500/30">
+            <div class="flex justify-between">
+                <h3 class="text-md font-black text-amber-400">💎 الباقة الماسية (كل 3 أيام)</h3>
+                <span class="bg-amber-500/10 text-amber-400 text-[10px] px-1.5 py-0.5 rounded font-bold">الأعلى طلباً</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">عائد ضخم بنسبة <span class="text-emerald-400 font-bold">36%</span> يتم صبه في حسابك كل 3 أيام كاملة.</p>
+            <div class="mt-3 flex justify-between text-xs text-slate-400">
+                <span>الحد الأدنى: 50$</span>
+                <span>الحد الأقصى: 50,000$</span>
+            </div>
+            <button onclick="invest('plan_2')" class="w-full mt-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black py-2.5 rounded-xl text-sm transition-all">استثمار مادي</button>
+        </div>
+    </div>
+
+    <script>
+        // تهيئة تطبيق تيليغرام المصغر
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // تمديد الشاشة لتغطية الهاتف بالكامل مثل هامستر
+
+        // جلب بيانات العميل الحقيقية من تيليغرام
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('user-name').innerText = (user.first_name + ' ' + (user.last_name || '')).trim();
+            document.getElementById('user-id').innerText = 'ID: ${user.id}';
+            if(user.first_name) {
+                document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
+            }
+        }
+
+        // التنقل بين التبويبات
+        function switchTab(tab) {
+            const mainTab = document.getElementById('tab-main');
+            const investTab = document.getElementById('tab-invest');
+            const mainBtn = document.getElementById('tab-main-btn');
+            const investBtn = document.getElementById('tab-invest-btn');
+
+            if (tab === 'main') {
+                mainTab.classList.remove('hidden');
+                investTab.classList.add('hidden');
+                mainBtn.className = "flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-center transition-all";
+                investBtn.className = "flex-1 py-2 rounded-xl bg-slate-800 text-slate-400 font-medium text-center transition-all";
+            } else {
+                mainTab.classList.add('hidden');
+                investTab.classList.remove('hidden');
+                mainBtn.className = "flex-1 py-2 rounded-xl bg-slate-800 text-slate-400 font-medium text-center transition-all";
+                investBtn.className = "flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-center transition-all";
+            }
+        }
+
+        // دالة الضغط على فتح التيكت
+        function openTicket() {
+            tg.showPopup({
+                title: '🎟 فتح تيكت الحظ',
+                message: 'هل تريد استخدام تيكت واحد لطلب مكافأة عشوائية؟',
+                buttons: [{id: 'ok', type: 'default', text: 'نعم، افتح'}, {type: 'cancel', text: 'إلغاء'}]
+            }, function(buttonId) {
+                if(buttonId === 'ok') {
+                    tg.showAlert('🎉 جاري معالجة طلبك وسحب الجائزة...');
+                    // هنا سيتم لاحقاً إرسال طلب fetch إلى الـ FastAPI Backend لتحديث البيانات حركياً
+                }
+            });
+        }
+
+        // دالة طلب الاستثمار في باقة
+        function invest(packageType) {
+            tg.showPopup({
+                title: '💼 تأكيد الاستثمار',
+                message:'هل أنت متأكد من رغبتك في تفعيل الباقة (${packageType})؟ سيتطلب هذا وجود رصيد كافٍ في حسابك.',
+                buttons: [{id: 'confirm', type: 'ok', text: 'تأكيد الشراء'}, {type: 'cancel', text: 'إلغاء'}]
+            });
+        }
+    </script>
+</body>
+</html>
