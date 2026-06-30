@@ -93,7 +93,7 @@
         const user = tg.initDataUnsafe?.user;
         if (user) {
             document.getElementById('user-name').innerText = (user.first_name + ' ' + (user.last_name || '')).trim();
-            document.getElementById('user-id').innerText = 'ID: ${user.id}';
+            document.getElementById('user-id').innerText = "ID: "$ + user.id;
             if(user.first_name) {
                 document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
             }
