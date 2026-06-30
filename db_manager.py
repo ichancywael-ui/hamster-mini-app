@@ -5,16 +5,16 @@ from datetime import datetime, timedelta
 
 # إعدادات الاتصال بقاعدة البيانات - استبدلها ببياناتك
 DB_CONFIG = {
-    'MYSQLHOST': 'mysql.railway.internal',
-    'MYSQLPORT': 3306,
-    'MYSQLUSER': 'root',
-    'MYSQLPASSWORD': 'ACkdOMkKZEqOSNdsXTDvdhalEMoLNQfq',
-    'MYSQLDATABASE': 'railway',
+    'host': 'mysql.railway.internal',
+    'port': 3306,
+    'user': 'root',
+    'password': 'ACkdOMkKZEqOSNdsXTDvdhalEMoLNQfq',
+    'db': 'railway',
     'autocommit': True
 }
 
 class DatabaseManager:
-    def init(self):
+    def __init__(self):
         self.pool = None
 
     async def initialize(self):
