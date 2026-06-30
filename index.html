@@ -138,7 +138,7 @@
         function invest(packageType) {
             tg.showPopup({
                 title: '💼 تأكيد الاستثمار',
-                message: 'هل أنت متأكد من رغبتك في تفعيل الباقة (${packageType})؟',
+                message: 'هل أنت متأكد من رغبتك في تفعيل الباقة (' + packageType + ')؟',
                 buttons: [{id: 'confirm', type: 'ok', text: 'تأكيد الشراء'}, {type: 'cancel', text: 'إلغاء'}]
             }, function(buttonId) {
                 if(buttonId === 'confirm') {
